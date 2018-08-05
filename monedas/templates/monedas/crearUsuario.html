@@ -1,0 +1,14 @@
+{% extends 'monedas/layout.html'%}
+{% block body %}
+    <header class="text-center" style="margin-bottom:20px;"><h2>Crear Nuevo Usuario</h2></header>
+
+        <div class="form-group row">
+            <div class="col-xs-3 col-xs-offset-4">
+                <form action="{% url 'crearUsuario' %}" method="POST">
+                    {% csrf_token %}
+                    {{form}}
+                    <button style="margin-top:10px;" type="submit" class="btn btn-success">Crear Usuario</button>
+                 </form>
+            </div>
+        </div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'monedas/layout.html'%}
+{% block body %}
+<header class="text-center"><h2>Monedas Creadas</h2></header>
+<div class="container">
+<table class="table" style="margin: 30px;">
+  <thead>
+    <tr>
+      <th scope="col">nombre moneda</th>
+      <th scope="col">signo Moneda</th>
+      <th scope="col">Creada Por</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+        {% for m in monedas %}
+        <th scope="row">3</th>
+        <td>{{m.nombreMoneda}}</td>
+        <td>{{m.nombreMoneda}}</td>
+        <td>{{m.nombreMoneda</td>
+        {% endfor %}
+    <tr>
+    </tr>
+  </tbody>
+</table>
+</div>
+{% endblock %}
