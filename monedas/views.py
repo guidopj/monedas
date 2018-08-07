@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 
-from .models import Moneda, Usuario
+from .models import Moneda, Usuario, MonedasUsuario
 from django.shortcuts import render, redirect
 from .forms import UsuarioForm, LoginForm, MonedaForm
 from django.contrib.auth import authenticate, login
@@ -62,3 +62,18 @@ def crearUsuario(request):
         form = UsuarioForm()
         context = {'form': form}
         return render(request, 'monedas/crearUsuario.html', context)
+
+def enviarMonedas(request, usuarioEnvia):
+    if request.method == 'POST':
+        #usuarioEnvia = MonedasUsuario.objects.get(userName=userName1,moneda=mon)
+        usuarioRecibe = request.POST.get("usuarioRecibe", "")
+        moneda = request.POST.get("moneda", "")
+        cantidad = request.POST.get("cant", "")
+        usuarioEnvia.enviarMonedas(usuarioRecibe,moneda,cantidad)
+        usuarioEnvia.save()
+        usuarioRecibe.save()
+        nuevoHistorial = {'usuarioEnvia': usuarioEnvia, 'usuarioRecibe' :usuarioRecibe, 'moneda' : mon, 'cantidad' : cant}
+        return render(request, 'monedas/home.html', nuevoHistorial)
+    else:
+        context = {'user' :usuarioEnvia}
+        return render(request, 'monedas/enviarMoneda.html', context)
