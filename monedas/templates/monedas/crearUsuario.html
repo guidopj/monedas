@@ -1,12 +1,29 @@
 {% extends 'monedas/layout.html'%}
 {% block body %}
     <header class="text-center" style="margin-bottom:20px;"><h2>Crear Nuevo Usuario</h2></header>
+        {% if form.errors %}
+            <div class="alert alert-error">
+            <h4>Please fix the following errors</h4>
+            <ul>
+            {% for field in form %}
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                        <li><a href="#id_{{ field.name }}" class="error">{{ error|escape }}</a></li>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+            </ul>
+            {% if form.non_field_errors %}
+                {{ form.non_field_errors }}
+            {% endif %}
+            </div>
+        {% endif %}
 
         <div class="form-group row">
             <div class="col-xs-3 col-xs-offset-4">
                 <form action="{% url 'crearUsuario' %}" method="POST">
-                    {% csrf_token %}
                     {{form}}
+                    {% csrf_token %}
                     <button style="margin-top:10px;" type="submit" class="btn btn-success">Crear Usuario</button>
                  </form>
             </div>

@@ -24,25 +24,18 @@
   </head>
   <!-- FIN HEADER -->
   <body>
+
     <div class="container">
       <div class = "row">
         <div class="col-md-10 col-md-offset-1" style="margin-top:70px;background-color:#868A08;height:550px;">
           <div class="col-md-6 col-md-offset-3" style="margin-top:20px;background-color:#D2B48C;height:510px;border-radius: 35px;">
-            <form class="form-group row col-md-12" style="margin-top:50px;text-align:center;font-size:30px;">
-              <!--<label class="col-form-label label">Nombre de Usuario</label>
-              <input type="text" class="form-control" id="inputPassword" placeholder="UserName"/>
-
-              <label for="inputPassword" class="col-form-label label">Contrasena</label>
-              <input type="password" class="form-control" id="inputPassword" placeholder="Password"/>
-
-              <buttom type="submit" class="form-control btn btn-primary" style="margin-top: inherit;">Iniciar Sesion</buttom>
-              -->
-
-              {{form}}
-              <buttom type="submit" class="form-control btn btn-primary" style="margin-top: inherit;">Iniciar Sesion</buttom>
+            <form action="{% url 'home' %}" method="POST" class="form-group row col-md-12" style="margin-top:50px;text-align:center;font-size:30px;">
+                {% csrf_token %}
+                {{form}}
+              <button type="submit" class="form-control btn btn-primary" style="margin-top: inherit;">Iniciar Sesion</button>
             </form>
 
-            <a href="">Crear Nuevo Usuario</a>
+            <a href="{% url 'crearUsuario' %}">Crear Nuevo Usuario</a>
           </div>
         </div>
       </div>

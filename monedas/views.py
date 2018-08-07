@@ -1,58 +1,63 @@
-from django.shortcuts import render
-from .forms import MonedaForm
-from .models import Moneda
-from django.shortcuts import redirect
-from .forms import UsuarioForm
-from .models import Usuario
-from .forms import LoginForm
+from django.core.exceptions import ValidationError
+
+from .models import Moneda, Usuario
+from django.shortcuts import render, redirect
+from .forms import UsuarioForm, LoginForm, MonedaForm
+from django.contrib.auth import authenticate, login
+from django.http import HttpResponse
 
 def index(request):
-    if request.method == 'POST':
-        form = MonedaForm(request.POST)
-        if form.is_valid():
-            pass
+    form = LoginForm()
+    context = {'form': form}
+    return render(request, 'monedas/login.html', context)
+
+def autenticarUsuario(request):
+    nombre = request.POST['nombreUsuario']
+    contrasena = request.POST['contrasena']
+    user = Usuario.objects.get(nombreUsuario=nombre)
+    if not user:
+        raise ValidationError("Usuario no existe")
     else:
-        form = LoginForm()
-
-    contexto = {'form': form}
-
-    return render(request, 'monedas/index.html', contexto)
+        context = {'user' : user}
+        return render(request, 'monedas/home.html')
 
 def obtenerMonedas(request):
     monedas = Moneda.objects.all()
     contexto = {'monedas': monedas}
 
-    return render(request, 'monedas/index.html', contexto)
+    return render(request, 'monedas/login.html', contexto)
 
 
-def crearMoneda(request):
+def crearMoneda(request, nombreUsuario):
     if request.method == 'POST':
         form = MonedaForm(request.POST)
         if form.is_valid():
             nuevaMoneda = Moneda(nombreMoneda=form.cleaned_data['nombreMoneda'],
-                                 signo=form.cleaned_data['signo'])
+                                 signo=form.cleaned_data['signo'],
+                                 userName=nombreUsuario)
             nuevaMoneda.save()
-            return redirect('index')
+            return redirect('home')
     else:
         form = MonedaForm()
-        context = {'form': form}
+        context = {'nombreUsuario': nombreUsuario}
         return render(request, 'monedas/crearMoneda.html', context)
+
 
 
 def crearUsuario(request):
     if request.method == 'POST':
         form = UsuarioForm(request.POST)
-        context = {'form': form}
         if form.is_valid():
-            nuevoUsuario = Usuario(nombreUsuario=form.cleaned_data['nombreUsuario'],
-                                  contrasena=form.cleaned_data['contrasena'],
-                                  nombre=form.cleaned_data['nombre'],
-                                  apellido=form.cleaned_data['apellido'],
-                                  fecha_nac=form.cleaned_data['fecha_nac'])
-            nuevoUsuario.save()
-            return render('monedas/home.html', context)
+            form.save()
+            userName = form.cleaned_data['nombreUsuario']
+            contrasena = form.cleaned_data['contrasena']
+            user = authenticate(username=userName, password=contrasena)
+            login(request, user)
+            return redirect('home', {'user': user})
         else:
+            context = {'errors': form.errors}
             return render(request, 'monedas/crearUsuario.html', context)
+
     else:
         form = UsuarioForm()
         context = {'form': form}
