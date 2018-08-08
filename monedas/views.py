@@ -26,15 +26,8 @@ def autenticarUsuario(request):
 def obtenerMonedas():
     return Moneda.objects.all()
 
-
-"""nombreMoneda = models.CharField(max_length=30, primary_key=True)
-    signo = models.CharField(max_length=8)
-    peso = models.IntegerField(default=0)
-    espesor = models.FloatField(default=0.0)
-    creadaPor = models.ForeignKey(Usuario, on_delete=models.CASCADE)
-    fechaCreacion"""
-
 def crearMoneda(request, user):
+    userObj = Usuario.objects.get(nombreUsuario=user)
     if request.method == 'POST':
         form = MonedaForm(request.POST)
         if form.is_valid():
@@ -42,7 +35,7 @@ def crearMoneda(request, user):
                                  signo=form.cleaned_data['signo'],
                                  peso=form.cleaned_data['peso'],
                                  espesor=form.cleaned_data['espesor'],
-                                 creadaPor=user
+                                 creadaPor=userObj
                                  )
             nuevaMoneda.save()
             return redirect('home')
@@ -63,7 +56,7 @@ def crearUsuario(request):
             contrasena = form.cleaned_data['contrasena']
             user = authenticate(username=userName, password=contrasena)
             login(request, user)
-            return redirect('home', {'user': user})
+            return render('monedas/home.html', {'user': user})
         else:
             context = {'errors': form.errors}
             return render(request, 'monedas/crearUsuario.html', context)
