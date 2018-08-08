@@ -29,7 +29,7 @@
       <div class = "row">
         <div class="col-md-10 col-md-offset-1" style="margin-top:70px;background-color:#868A08;height:550px;">
           <div class="col-md-6 col-md-offset-3" style="margin-top:20px;background-color:#D2B48C;height:510px;border-radius: 35px;">
-            <form action="{% url 'home' %}" method="POST" class="form-group row col-md-12" style="margin-top:50px;text-align:center;font-size:30px;">
+            <form action="{% url 'autenticar' %}" method="POST" class="form-group row col-md-12" style="margin-top:50px;text-align:center;font-size:30px;">
                 {% csrf_token %}
                 {{form}}
               <button type="submit" class="form-control btn btn-primary" style="margin-top: inherit;">Iniciar Sesion</button>

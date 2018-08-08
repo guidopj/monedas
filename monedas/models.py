@@ -16,7 +16,7 @@ class Moneda(models.Model):
     peso = models.IntegerField(default=0)
     espesor = models.FloatField(default=0.0)
     creadaPor = models.ForeignKey(Usuario, on_delete=models.CASCADE)
-    fechaCreacion = models.DateTimeField(default=datetime.now)
+    fechaCreacion = models.DateField(default=datetime.now)
 
 
 

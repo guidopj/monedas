@@ -1,10 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'monedas/layout.html'%}
+{% block body %}
+    <header class="text-center" style="margin-bottom:20px;"><h2>Crear Nueva Moneda</h2></header>
 
-</body>
-</html>
+        <div class="form-group row">
+            <div class="col-xs-3 col-xs-offset-4">
+                <form action="{% url 'enviarMoneda' user %}" method="POST">
+                    {% csrf_token %}
+
+                    <button style="margin-top:10px;" type="submit" class="btn btn-success">Guardar Moneda</button>
+                 </form>
+            </div>
+        </div>
+{% endblock %}
