@@ -12,18 +12,16 @@ def index(request):
     context = {'form': form}
     return render(request, 'monedas/login.html', context)
 
-def home(request,user):
-    return render(request, 'monedas/home.html', {'user' : user})
+def home(request, user):
+    return render(request, 'monedas/home.html', {'user': user})
 
 def crearUsuario(request):
     if request.method == 'POST':
         form = UsuarioForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            contrasena = form.cleaned_data['contrasena']
-            user.set_password = contrasena
             user.save()
-            messages.error(request, "Usuario " + user.nombreUsuario + " creado correctamente")
+            messages.success(request, "Usuario " + user.nombreUsuario + " creado correctamente")
             return redirect('index')
         else:
             context = {'errors': form.errors}
@@ -42,15 +40,12 @@ def autenticarUsuario(request):
             contrasena = form.cleaned_data['contrasena']
             try:
                 user = Usuario.objects.get(nombreUsuario=nombreUsuario)
-                login(request, user)
-                context = {'user': nombreUsuario, 'monedas': obtenerMonedas()}
-                #return render(request, 'monedas/home.html', context)
-                return redirect('home', context)
+                return redirect(home, user=nombreUsuario)
             except:
                 messages.error(request, "Usuario " + nombreUsuario + " no existe")
                 return redirect('index')
         else:
-            return render(request, 'monedas/login.html', {'errors' : form.errors})
+            return render(request, 'monedas/login.html', {'errors': form.errors})
 
 
 
