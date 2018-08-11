@@ -9,6 +9,8 @@ class Usuario(models.Model):
     apellido = models.CharField(max_length=100)
     fecha_nac = models.DateField(
                 blank=False, null=False)
+    last_login = models.DateField(
+                blank=False, null=False, default=datetime.now())
 
 class Moneda(models.Model):
     nombreMoneda = models.CharField(max_length=30, primary_key=True)
@@ -21,8 +23,8 @@ class Moneda(models.Model):
 
 
 class MonedasUsuario(models.Model):
-    nombreUsuario = models.ForeignKey(Usuario,on_delete=models.CASCADE)
-    nombreMoneda = models.ForeignKey(Moneda,on_delete=models.CASCADE)
+    id_usuario = models.ForeignKey(Usuario,on_delete=models.CASCADE)
+    id_moneda = models.ForeignKey(Moneda,on_delete=models.CASCADE)
     cantMonedas = models.IntegerField(default=0)
 
     def poseeSufMonedas(self, cantPedidas):

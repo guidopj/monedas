@@ -1,6 +1,7 @@
-from django.core.exceptions import ValidationError
+from django.contrib import  messages
 
 from .models import Moneda, Usuario, MonedasUsuario
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from .forms import UsuarioForm, LoginForm, MonedaForm
 from django.contrib.auth import authenticate, login
@@ -11,52 +12,19 @@ def index(request):
     context = {'form': form}
     return render(request, 'monedas/login.html', context)
 
-def autenticarUsuario(request):
-    if request.method == 'POST':
-        nombre = request.POST['nombreUsuario']
-        contrasena = request.POST['contrasena']
-        user = Usuario.objects.get(nombreUsuario=nombre)
-        if not user:
-            raise ValidationError("Usuario no existe")
-        else:
-            context = {'user': user, 'monedas': obtenerMonedas()}
-            return render(request, 'monedas/home.html', context)
-
-
-def obtenerMonedas():
-    return Moneda.objects.all()
-
-def crearMoneda(request, user):
-    userObj = Usuario.objects.get(nombreUsuario=user)
-    if request.method == 'POST':
-        form = MonedaForm(request.POST)
-        if form.is_valid():
-            nuevaMoneda = Moneda(nombreMoneda=form.cleaned_data['nombreMoneda'],
-                                 signo=form.cleaned_data['signo'],
-                                 peso=form.cleaned_data['peso'],
-                                 espesor=form.cleaned_data['espesor'],
-                                 creadaPor=userObj
-                                 )
-            nuevaMoneda.save()
-            return redirect('home')
-    else:
-        form = MonedaForm()
-        context = {'user': user, 'form': form}
-        #return render(request, 'monedas/crearMoneda.html', context)
-        return render(request, 'monedas/crearMoneda.html', context)
-
-
+def home(request,user):
+    return render(request, 'monedas/home.html', {'user' : user})
 
 def crearUsuario(request):
     if request.method == 'POST':
         form = UsuarioForm(request.POST)
         if form.is_valid():
-            form.save()
-            userName = form.cleaned_data['nombreUsuario']
+            user = form.save(commit=False)
             contrasena = form.cleaned_data['contrasena']
-            user = authenticate(username=userName, password=contrasena)
-            login(request, user)
-            return render('monedas/home.html', {'user': user})
+            user.set_password = contrasena
+            user.save()
+            messages.error(request, "Usuario " + user.nombreUsuario + " creado correctamente")
+            return redirect('index')
         else:
             context = {'errors': form.errors}
             return render(request, 'monedas/crearUsuario.html', context)
@@ -66,17 +34,26 @@ def crearUsuario(request):
         context = {'form': form}
         return render(request, 'monedas/crearUsuario.html', context)
 
-"""def enviarMoneda(request, usuarioEnvia):
+def autenticarUsuario(request):
     if request.method == 'POST':
-        #usuarioEnvia = MonedasUsuario.objects.get(userName=userName1,moneda=mon)
-        usuarioRecibe = request.POST.get("usuarioRecibe", "")
-        moneda = request.POST.get("moneda", "")
-        cantidad = request.POST.get("cant", "")
-        usuarioEnvia.enviarMonedas(usuarioRecibe,moneda,cantidad)
-        usuarioEnvia.save()
-        usuarioRecibe.save()
-        nuevoHistorial = {'usuarioEnvia': usuarioEnvia, 'usuarioRecibe' :usuarioRecibe, 'moneda': moneda, 'cantidad': cantidad}
-        return render(request, 'monedas/home.html', nuevoHistorial)
-    else:
-        context = {'user':usuarioEnvia.nombreUsuario}
-        return render(request, 'monedas/enviarMoneda.html', context)"""
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            nombreUsuario = form.cleaned_data['nombreUsuario']
+            contrasena = form.cleaned_data['contrasena']
+            try:
+                user = Usuario.objects.get(nombreUsuario=nombreUsuario)
+                login(request, user)
+                context = {'user': nombreUsuario, 'monedas': obtenerMonedas()}
+                #return render(request, 'monedas/home.html', context)
+                return redirect('home', context)
+            except:
+                messages.error(request, "Usuario " + nombreUsuario + " no existe")
+                return redirect('index')
+        else:
+            return render(request, 'monedas/login.html', {'errors' : form.errors})
+
+
+
+
+def obtenerMonedas():
+    return Moneda.objects.all()

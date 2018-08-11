@@ -2,9 +2,9 @@
 {% block body %}
 
         <div class="form-group row">
+            {{errors}}
             <div class="col-xs-3 col-xs-offset-4">
                 <form action="{% url 'crearUsuario' %}" method="POST">
-                    {{errors}}
                     {{form}}
                     {% csrf_token %}
                     <button style="margin-top:10px;" type="submit" class="btn btn-success">Crear Usuario</button>
