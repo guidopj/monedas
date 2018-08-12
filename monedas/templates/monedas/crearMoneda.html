@@ -1,7 +1,7 @@
 {% extends 'monedas/layout.html'%}
 {% block body %}
     <header class="text-center" style="margin-bottom:20px;"><h2>Crear Nueva Moneda</h2></header>
-
+        {{form.errors}}
         <div class="form-group row">
             <div class="col-xs-3 col-xs-offset-4">
                 <form action="{% url 'crearMoneda' user %}" method="POST">
