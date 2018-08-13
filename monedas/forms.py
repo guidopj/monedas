@@ -1,5 +1,5 @@
 from django import forms
-from .models import Moneda
+from .models import Moneda, MonedasUsuario
 from .models import Usuario
 
 
@@ -37,7 +37,15 @@ class UsuarioForm(forms.ModelForm):
                 attrs={'class': 'form-control'}),
         }
 
+class ComprarMonedasForm(forms.Form):
+    moneda = forms.ModelChoiceField(queryset=Moneda.objects.all(), empty_label="--", to_field_name="nombreMoneda")
+    cantidad = forms.IntegerField(widget=forms.NumberInput)
 
 class LoginForm(forms.Form):
     nombreUsuario = forms.CharField(max_length=100, widget=forms.TextInput)
     contrasena = forms.CharField(max_length=32, widget=forms.PasswordInput)
+
+class EnviarMonedasForm(forms.Form):
+    monedas = forms.ModelChoiceField(queryset=Moneda.objects.all(), empty_label="--", to_field_name="nombreMoneda")
+    usuarios = forms.ModelChoiceField(queryset=Usuario.objects.all(), empty_label="--", to_field_name="nombreUsuario")
+    cantidad = forms.IntegerField(widget=forms.NumberInput)

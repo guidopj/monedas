@@ -12,6 +12,9 @@ class Usuario(models.Model):
     last_login = models.DateField(
                 blank=False, null=False, default=datetime.now())
 
+    def __str__(u):
+        return u.nombreUsuario
+
 class Moneda(models.Model):
     nombreMoneda = models.CharField(max_length=30, primary_key=True)
     signo = models.CharField(max_length=8)
@@ -20,11 +23,14 @@ class Moneda(models.Model):
     creadaPor = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     fechaCreacion = models.DateField(default=datetime.now)
 
+    def __str__(m):
+        return m.nombreMoneda
+
 
 
 class MonedasUsuario(models.Model):
-    id_usuario = models.ForeignKey(Usuario,on_delete=models.CASCADE)
-    id_moneda = models.ForeignKey(Moneda,on_delete=models.CASCADE)
+    usuario = models.ForeignKey(Usuario,on_delete=models.CASCADE)
+    moneda = models.ForeignKey(Moneda,on_delete=models.CASCADE)
     cantMonedas = models.IntegerField(default=0)
 
     def poseeSufMonedas(self, cantPedidas):

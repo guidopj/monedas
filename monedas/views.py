@@ -3,7 +3,7 @@ from django.contrib import messages
 from .models import Moneda, Usuario, MonedasUsuario
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
-from .forms import UsuarioForm, LoginForm, MonedaForm
+from .forms import UsuarioForm, LoginForm, MonedaForm, EnviarMonedasForm, ComprarMonedasForm
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 
@@ -15,7 +15,8 @@ def index(request):
 
 
 def home(request, user):
-    return render(request, 'monedas/home.html', {'user': user})
+    monedas = obtenerMonedas()
+    return render(request, 'monedas/home.html', {'user': user, 'monedas' : monedas})
 
 
 def crearUsuario(request):
@@ -69,7 +70,53 @@ def crearMoneda(request, user):
             messages.error(request, "Error en la creacion de moneda")
         return HttpResponseRedirect("")
     else:
-        # user = Usuario.objects.get(nombreUsuario=username)
         form = MonedaForm()
         context = {'form': form, 'user': user}
         return render(request, 'monedas/crearMoneda.html', context)
+
+
+def comprarMonedas(request, user):
+    if request.method == 'POST':
+        form = ComprarMonedasForm(request.POST)
+        if form.is_valid():
+
+            nombreMoneda = form.cleaned_data['moneda']
+            cantidad = form.cleaned_data['cantidad']
+
+            usuario = Usuario.objects.get(nombreUsuario=user)
+
+            try:
+                usuario = MonedasUsuario.objects.get(moneda=nombreMoneda, usuario=usuario)
+                usuario.cantMonedas = usuario.cantMonedas + cantidad
+                usuario.save()
+                messages.success(request, "Se suman monedas a lo que ya tenias")
+                return HttpResponseRedirect("")
+            except MonedasUsuario.DoesNotExist:
+                MonedasUsuario.objects.create(moneda=nombreMoneda, usuario=usuario, cantMonedas=cantidad)
+                messages.success(request, "Comienza a tener este tipo de monedas")
+                return HttpResponseRedirect("")
+
+
+        else:
+            messages.error(request, "Error en la transaccion")
+            return HttpResponse("NO!")
+    else:
+        form = ComprarMonedasForm()
+        context = {'form': form, 'user': user}
+        return render(request, 'monedas/comprarMonedas.html', context)
+
+
+def enviarMonedas(request, user):
+    if request.method == 'POST':
+        form = EnviarMonedasForm(request.POST)
+        if form.is_valid():
+            return HttpResponse("CORRECTO")
+            #messages.success(request, "Moneda" + moneda.nombreMoneda + " creada correctamente")
+        else:
+            messages.error(request, "Error en la creacion de moneda")
+            return HttpResponse("NO!")
+        #return HttpResponseRedirect("")
+    else:
+        form = EnviarMonedasForm()
+        context = {'form': form, 'user': user}
+        return render(request, 'monedas/enviarMonedas.html', context)
