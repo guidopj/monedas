@@ -135,3 +135,8 @@ def enviarMonedas(request, user):
         form = EnviarMonedasForm()
         context = {'form': form, 'user': user}
         return render(request, 'monedas/enviarMonedas.html', context)
+
+def balance(request, user):
+    monedasDeUsuario = MonedasUsuario.objects.filter(usuario=user)
+    context = {'monedasDeUsuario': monedasDeUsuario, 'user': user}
+    return render(request, 'monedas/balance.html', context)

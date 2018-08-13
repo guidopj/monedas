@@ -44,7 +44,9 @@ class MonedasUsuario(models.Model):
             raise ValidationError("No tenes suficientes monedas")
 
 class Historial(models.Model):
+    accion = models.CharField(max_length=100, null=True)
     usuarioEnvia = models.ForeignKey(Usuario,on_delete=models.CASCADE,related_name='usuarioEnvia')
     usuarioRecibe = models.ForeignKey(Usuario,on_delete=models.CASCADE,related_name='usuarioRecibe')
     moneda = models.ForeignKey(Moneda,on_delete=models.CASCADE)
+    cantMonedas = models.IntegerField(default=0)
     fechaTransaccion = models.DateTimeField(default=datetime.now)

@@ -1,0 +1,22 @@
+{% extends 'monedas/layout.html'%}
+{% block body %}
+<header class="text-center"><h2>Balance Monedas</h2></header>
+<div class="container">
+<table class="table" style="margin: 30px;">
+  <thead>
+    <tr>
+      <th scope="col">nombre moneda</th>
+      <th scope="col">cantidad</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for m in monedasDeUsuario %}
+       <tr>
+            <td>{{m.moneda}}</td>
+            <td>{{m.cantMonedas}}</td>
+       </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

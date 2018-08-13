@@ -1,0 +1,28 @@
+{% extends 'monedas/layout.html'%}
+{% block body %}
+<header class="text-center"><h2>Historial de Transacciones</h2></header>
+<div class="container">
+<table class="table" style="margin: 30px;">
+  <thead>
+    <tr>
+        <th scope="col">Accion</th>
+        <th scope="col">moneda</th>
+        <th scope="col">usuario emisor</th>
+        <th scope="col">usuario receptor</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for h in historial %}
+       <tr>
+            <td>{{h.accion}}</td>
+            <td>{{h.moneda}}</td>
+           <td>{{h.usuarioEnvia}}</td>
+           <td>{{h.usuarioRecibe}}</td>
+           <td>{{h.cantMonedas}}</td>
+           <td>{{h.fechaTransaccion}}</td>
+       </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}
