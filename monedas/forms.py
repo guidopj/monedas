@@ -46,6 +46,6 @@ class LoginForm(forms.Form):
     contrasena = forms.CharField(max_length=32, widget=forms.PasswordInput)
 
 class EnviarMonedasForm(forms.Form):
-    monedas = forms.ModelChoiceField(queryset=Moneda.objects.all(), empty_label="--", to_field_name="nombreMoneda")
-    usuarios = forms.ModelChoiceField(queryset=Usuario.objects.all(), empty_label="--", to_field_name="nombreUsuario")
+    moneda = forms.ModelChoiceField(queryset=Moneda.objects.all(), empty_label="--", to_field_name="nombreMoneda")
+    usuario = forms.ModelChoiceField(queryset=Usuario.objects.all(), empty_label="--", to_field_name="nombreUsuario")
     cantidad = forms.IntegerField(widget=forms.NumberInput)

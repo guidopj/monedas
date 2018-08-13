@@ -110,12 +110,27 @@ def enviarMonedas(request, user):
     if request.method == 'POST':
         form = EnviarMonedasForm(request.POST)
         if form.is_valid():
-            return HttpResponse("CORRECTO")
-            #messages.success(request, "Moneda" + moneda.nombreMoneda + " creada correctamente")
+            moneda = form.cleaned_data['moneda']
+            usuarioRecibe = form.cleaned_data['usuario']
+            cantidad = form.cleaned_data['cantidad']
+            usuarioEnvia = MonedasUsuario.objects.get(usuario=user)
+            try:
+                usuarioRecibe = MonedasUsuario.objects.get(moneda=moneda, usuario=usuarioRecibe)
+                usuarioRecibe.cantMonedas = usuarioRecibe.cantMonedas + cantidad
+                usuarioEnvia.cantMonedas = usuarioEnvia.cantMonedas - cantidad
+                usuarioRecibe.save()
+                usuarioEnvia.save()
+                messages.success(request, "Se suman monedas a lo que ya tenias")
+                return HttpResponseRedirect("")
+            except MonedasUsuario.DoesNotExist:
+                MonedasUsuario.objects.create(moneda=moneda, usuario=usuarioRecibe, cantMonedas=cantidad)
+                usuarioEnvia.cantMonedas = usuarioEnvia.cantMonedas - cantidad
+                usuarioEnvia.save()
+                messages.success(request, "Comienza a tener este tipo de monedas")
+                return HttpResponseRedirect("")
         else:
             messages.error(request, "Error en la creacion de moneda")
             return HttpResponse("NO!")
-        #return HttpResponseRedirect("")
     else:
         form = EnviarMonedasForm()
         context = {'form': form, 'user': user}
