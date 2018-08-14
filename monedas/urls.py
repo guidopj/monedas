@@ -8,6 +8,7 @@ urlpatterns = [
     path('enviarMonedas/<user>/', views.enviarMonedas, name="enviarMonedas"),
     path('crearUsuario/', views.crearUsuario, name="crearUsuario"),
     path('autenticar', views.autenticarUsuario, name="autenticar"),
+    path('historial/<user>/', views.historial, name="historial"),
     path('home/<user>/', views.home, name="autenticar"),
     path('balance/<user>/', views.balance, name="balance")
 ]

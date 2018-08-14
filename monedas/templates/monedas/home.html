@@ -11,15 +11,14 @@
     </tr>
   </thead>
   <tbody>
-    <tr>
-        {% for m in monedas %}
+    {% for m in monedas %}
+        <tr>
+            <td>{{m.nombreMoneda}}</td>
+            <td>{{m.signo}}</td>
+            <td>{{m.creadaPor}}</td>
 
-        <td>{{m.nombreMoneda}}</td>
-        <td>{{m.signo}}</td>
-        <td>{{m.creadaPor}}</td>
-
-        {% endfor %}
-    <tr>
+            {% endfor %}
+        <tr>
     </tr>
   </tbody>
 </table>

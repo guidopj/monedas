@@ -45,8 +45,9 @@ class MonedasUsuario(models.Model):
 
 class Historial(models.Model):
     accion = models.CharField(max_length=100, null=True)
-    usuarioEnvia = models.ForeignKey(Usuario,on_delete=models.CASCADE,related_name='usuarioEnvia')
-    usuarioRecibe = models.ForeignKey(Usuario,on_delete=models.CASCADE,related_name='usuarioRecibe')
-    moneda = models.ForeignKey(Moneda,on_delete=models.CASCADE)
+    usuarioCreador = models.CharField(max_length=100, null=True)
+    usuarioEnvia = models.CharField(max_length=100, null=True)
+    usuarioRecibe = models.CharField(max_length=100, null=True)
+    moneda = models.CharField(max_length=100, null=True)
     cantMonedas = models.IntegerField(default=0)
     fechaTransaccion = models.DateTimeField(default=datetime.now)

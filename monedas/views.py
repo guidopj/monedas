@@ -1,6 +1,6 @@
 from django.contrib import messages
 
-from .models import Moneda, Usuario, MonedasUsuario
+from .models import Moneda, Usuario, MonedasUsuario, Historial
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from .forms import UsuarioForm, LoginForm, MonedaForm, EnviarMonedasForm, ComprarMonedasForm
@@ -66,6 +66,12 @@ def crearMoneda(request, user):
             moneda.creadaPor = user
             moneda.save()
             messages.success(request, "Moneda" + moneda.nombreMoneda + " creada correctamente")
+            Historial.objects.create(accion="creacion de Moneda",
+                                     usuarioCreador=user,
+                                     usuarioEnvia="",
+                                     usuarioRecibe="",
+                                     moneda=form.cleaned_data['nombreMoneda'],
+                                     cantMonedas=0)
         else:
             messages.error(request, "Error en la creacion de moneda")
         return HttpResponseRedirect("")
@@ -95,8 +101,13 @@ def comprarMonedas(request, user):
                 MonedasUsuario.objects.create(moneda=nombreMoneda, usuario=usuario, cantMonedas=cantidad)
                 messages.success(request, "Comienza a tener este tipo de monedas")
                 return HttpResponseRedirect("")
-
-
+            finally:
+                Historial.objects.create(accion="compra de Moneda",
+                                         usuarioCreador=user,
+                                         usuarioEnvia="",
+                                         usuarioRecibe="",
+                                         moneda=form.cleaned_data['moneda'],
+                                         cantMonedas=form.cleaned_data['cantidad'])
         else:
             messages.error(request, "Error en la transaccion")
             return HttpResponse("NO!")
@@ -113,7 +124,7 @@ def enviarMonedas(request, user):
             moneda = form.cleaned_data['moneda']
             usuarioRecibe = form.cleaned_data['usuario']
             cantidad = form.cleaned_data['cantidad']
-            usuarioEnvia = MonedasUsuario.objects.get(usuario=user)
+            usuarioEnvia = MonedasUsuario.objects.get(usuario=user, moneda=moneda)
             try:
                 usuarioRecibe = MonedasUsuario.objects.get(moneda=moneda, usuario=usuarioRecibe)
                 usuarioRecibe.cantMonedas = usuarioRecibe.cantMonedas + cantidad
@@ -128,6 +139,13 @@ def enviarMonedas(request, user):
                 usuarioEnvia.save()
                 messages.success(request, "Comienza a tener este tipo de monedas")
                 return HttpResponseRedirect("")
+            finally:
+                Historial.objects.create(accion="Enviar Monedas",
+                                         usuarioCreador="",
+                                         usuarioEnvia=user,
+                                         usuarioRecibe=form.cleaned_data['usuario'],
+                                         moneda=form.cleaned_data['moneda'],
+                                         cantMonedas=form.cleaned_data['cantidad'])
         else:
             messages.error(request, "Error en la creacion de moneda")
             return HttpResponse("NO!")
@@ -140,3 +158,8 @@ def balance(request, user):
     monedasDeUsuario = MonedasUsuario.objects.filter(usuario=user)
     context = {'monedasDeUsuario': monedasDeUsuario, 'user': user}
     return render(request, 'monedas/balance.html', context)
+
+def historial(request, user):
+    historial = Historial.objects.all()
+    context = {'historial': historial, 'user': user}
+    return render(request, 'monedas/historial.html', context)

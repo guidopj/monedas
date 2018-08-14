@@ -6,18 +6,22 @@
   <thead>
     <tr>
         <th scope="col">Accion</th>
-        <th scope="col">moneda</th>
+        <th scope="col">Usuario Creador</th>
         <th scope="col">usuario emisor</th>
         <th scope="col">usuario receptor</th>
+        <th scope="col">moneda</th>
+        <th scope="col">Cantidad de Monedas</th>
+        <th scope="col">Fecha de Transaccion</th>
     </tr>
   </thead>
   <tbody>
     {% for h in historial %}
        <tr>
             <td>{{h.accion}}</td>
-            <td>{{h.moneda}}</td>
+           <td>{{h.usuarioCreador}}</td>
            <td>{{h.usuarioEnvia}}</td>
            <td>{{h.usuarioRecibe}}</td>
+           <td>{{h.moneda}}</td>
            <td>{{h.cantMonedas}}</td>
            <td>{{h.fechaTransaccion}}</td>
        </tr>
