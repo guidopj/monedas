@@ -1,7 +1,7 @@
 from django.contrib import messages
 
 from .models import Moneda, Usuario, MonedasUsuario, Historial
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.shortcuts import render, redirect
 from .forms import UsuarioForm, LoginForm, MonedaForm, EnviarMonedasForm, ComprarMonedasForm
 from django.http import HttpResponse
@@ -127,8 +127,9 @@ def enviarMonedas(request, user):
             usuarioEnvia = MonedasUsuario.objects.get(usuario=user, moneda=moneda)
             try:
                 usuarioRecibe = MonedasUsuario.objects.get(moneda=moneda, usuario=usuarioRecibe)
-                usuarioRecibe.cantMonedas = usuarioRecibe.cantMonedas + cantidad
-                usuarioEnvia.cantMonedas = usuarioEnvia.cantMonedas - cantidad
+                #usuarioRecibe.cantMonedas = usuarioRecibe.cantMonedas + cantidad
+                #usuarioEnvia.cantMonedas = usuarioEnvia.cantMonedas - cantidad
+                usuarioEnvia.enviarMonedas(usuarioRecibe, cantidad)
                 usuarioRecibe.save()
                 usuarioEnvia.save()
                 messages.success(request, "Se suman monedas a lo que ya tenias")
