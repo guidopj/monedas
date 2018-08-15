@@ -33,8 +33,8 @@ class UsuarioForm(forms.ModelForm):
             'apellido': forms.TextInput(
                 attrs={'class': 'form-control'}),
             'fecha_nac': forms.DateInput(
-                format=('/%d/%m/%Y'),
-                attrs={'class': 'form-control'}),
+                format="%Y-%m-%d",
+                attrs={'class': 'form-control', 'type': 'date'}),
         }
 
 class ComprarMonedasForm(forms.Form):
