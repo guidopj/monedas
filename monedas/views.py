@@ -44,7 +44,7 @@ def autenticarUsuario(request):
             nombreUsuario = form.cleaned_data['nombreUsuario']
             contrasena = form.cleaned_data['contrasena']
             try:
-                user = Usuario.objects.get(nombreUsuario=nombreUsuario)
+                user = Usuario.objects.get(nombreUsuario=nombreUsuario, contrasena=contrasena)
                 return redirect(home, user=nombreUsuario)
             except:
                 messages.error(request, "Usuario " + nombreUsuario + " no existe")
@@ -77,30 +77,25 @@ def crearMoneda(request, user):
         return HttpResponseRedirect("")
     else:
         form = MonedaForm()
-        context = {'form': form, 'user': user}
-        return render(request, 'monedas/crearMoneda.html', context)
+        context = {'form': form, 'user': user, 'titulo': 'Crear Nueva Moneda', 'urlParam': 'crearMoneda'}
+        return render(request, 'monedas/monedas_template.html', context)
 
 
 def comprarMonedas(request, user):
     if request.method == 'POST':
         form = ComprarMonedasForm(request.POST)
         if form.is_valid():
-
             nombreMoneda = form.cleaned_data['moneda']
             cantidad = form.cleaned_data['cantidad']
-
             usuario = Usuario.objects.get(nombreUsuario=user)
-
             try:
                 usuario = MonedasUsuario.objects.get(moneda=nombreMoneda, usuario=usuario)
                 usuario.cantMonedas = usuario.cantMonedas + cantidad
                 usuario.save()
                 messages.success(request, "Se suman monedas a lo que ya tenias")
-                return HttpResponseRedirect("")
             except MonedasUsuario.DoesNotExist:
                 MonedasUsuario.objects.create(moneda=nombreMoneda, usuario=usuario, cantMonedas=cantidad)
                 messages.success(request, "Comienza a tener este tipo de monedas")
-                return HttpResponseRedirect("")
             finally:
                 Historial.objects.create(accion="compra de Moneda",
                                          usuarioCreador=user,
@@ -108,13 +103,14 @@ def comprarMonedas(request, user):
                                          usuarioRecibe="",
                                          moneda=form.cleaned_data['moneda'],
                                          cantMonedas=form.cleaned_data['cantidad'])
+                return HttpResponseRedirect("")
         else:
             messages.error(request, "Error en la transaccion")
             return HttpResponse("NO!")
     else:
         form = ComprarMonedasForm()
-        context = {'form': form, 'user': user}
-        return render(request, 'monedas/comprarMonedas.html', context)
+        context = {'form': form, 'user': user, 'titulo': 'Comprar Monedas', 'urlParam': 'comprarMonedas'}
+        return render(request, 'monedas/monedas_template.html', context)
 
 
 def enviarMonedas(request, user):
@@ -124,36 +120,40 @@ def enviarMonedas(request, user):
             moneda = form.cleaned_data['moneda']
             usuarioRecibe = form.cleaned_data['usuario']
             cantidad = form.cleaned_data['cantidad']
-            usuarioEnvia = MonedasUsuario.objects.get(usuario=user, moneda=moneda)
+            userEnvia = MonedasUsuario.objects.get(usuario=user, moneda=moneda)
+            userRecibe = None
             try:
-                usuarioRecibe = MonedasUsuario.objects.get(moneda=moneda, usuario=usuarioRecibe)
-                #usuarioRecibe.cantMonedas = usuarioRecibe.cantMonedas + cantidad
-                #usuarioEnvia.cantMonedas = usuarioEnvia.cantMonedas - cantidad
-                usuarioEnvia.enviarMonedas(usuarioRecibe, cantidad)
-                usuarioRecibe.save()
-                usuarioEnvia.save()
-                messages.success(request, "Se suman monedas a lo que ya tenias")
-                return HttpResponseRedirect("")
+                userRecibe = MonedasUsuario.objects.get(moneda=moneda, usuario=usuarioRecibe)
+                userEnvia.enviarMonedasExistente(cantidad, userRecibe)
             except MonedasUsuario.DoesNotExist:
-                MonedasUsuario.objects.create(moneda=moneda, usuario=usuarioRecibe, cantMonedas=cantidad)
-                usuarioEnvia.cantMonedas = usuarioEnvia.cantMonedas - cantidad
-                usuarioEnvia.save()
-                messages.success(request, "Comienza a tener este tipo de monedas")
-                return HttpResponseRedirect("")
+                userRecibe = userEnvia.enviarMonedasANuevo(cantidad, usuarioRecibe, moneda)
+            except ValidationError:
+                messages.error(request, "No posee suficientes monedas")
             finally:
-                Historial.objects.create(accion="Enviar Monedas",
-                                         usuarioCreador="",
-                                         usuarioEnvia=user,
-                                         usuarioRecibe=form.cleaned_data['usuario'],
-                                         moneda=form.cleaned_data['moneda'],
-                                         cantMonedas=form.cleaned_data['cantidad'])
+                if userRecibe is None:
+                    Historial.objects.create(accion="Enviado Fallido de Monedas",
+                                             usuarioCreador="",
+                                             usuarioEnvia=user,
+                                             usuarioRecibe=usuarioRecibe,
+                                             moneda=moneda,
+                                             cantMonedas=cantidad)
+                else:
+                    userRecibe.save()
+                    userEnvia.save()
+                    messages.success(request, "Transaccion realizada correctamente")
+                    Historial.objects.create(accion="Enviar Monedas",
+                                             usuarioCreador="",
+                                             usuarioEnvia=user,
+                                             usuarioRecibe=usuarioRecibe,
+                                             moneda=moneda,
+                                             cantMonedas=cantidad)
+                return HttpResponseRedirect("")
         else:
-            messages.error(request, "Error en la creacion de moneda")
-            return HttpResponse("NO!")
+            return HttpResponse("Error en la creacion de moneda")
     else:
         form = EnviarMonedasForm()
-        context = {'form': form, 'user': user}
-        return render(request, 'monedas/enviarMonedas.html', context)
+        context = {'form': form, 'user': user, 'titulo': 'Enviar Monedas', 'urlParam': 'enviarMonedas'}
+        return render(request, 'monedas/monedas_template.html', context)
 
 def balance(request, user):
     monedasDeUsuario = MonedasUsuario.objects.filter(usuario=user)

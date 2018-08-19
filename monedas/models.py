@@ -1,6 +1,7 @@
 from django.db import models
 from datetime import datetime
 from django.core.exceptions import ValidationError
+from django.contrib import messages
 
 class Usuario(models.Model):
     nombreUsuario = models.CharField(max_length=30, primary_key=True)
@@ -36,12 +37,22 @@ class MonedasUsuario(models.Model):
     def poseeSufMonedas(self, cantPedidas):
         return self.cantMonedas >= cantPedidas
 
-    def enviarMonedas(self, userRecibe, cantPedidas):
+    def enviarMonedas(self, cantPedidas, userRecibe):
         if self.poseeSufMonedas(cantPedidas):
             userRecibe.cantMonedas = userRecibe.cantMonedas + cantPedidas
             self.cantMonedas = self.cantMonedas - cantPedidas
         else:
             raise ValidationError("No tenes suficientes monedas")
+
+    def enviarMonedasANuevo(self, cantidad, usuarioRecibe, moneda):
+        if self.poseeSufMonedas(cantidad):
+            userRecibe = MonedasUsuario.objects.create(moneda=moneda, usuario=usuarioRecibe, cantMonedas=cantidad)
+            self.cantMonedas = self.cantMonedas - cantidad
+            return userRecibe
+        else:
+            messages.error("No posees dicha cantidad de monedas")
+            raise ValidationError()
+
 
 class Historial(models.Model):
     accion = models.CharField(max_length=100, null=True)

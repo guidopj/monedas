@@ -1,5 +1,5 @@
 from django import forms
-from .models import Moneda, MonedasUsuario
+from .models import Moneda
 from .models import Usuario
 
 
@@ -38,14 +38,17 @@ class UsuarioForm(forms.ModelForm):
         }
 
 class ComprarMonedasForm(forms.Form):
-    moneda = forms.ModelChoiceField(queryset=Moneda.objects.all(), empty_label="--", to_field_name="nombreMoneda")
-    cantidad = forms.IntegerField(widget=forms.NumberInput)
+    moneda = forms.ModelChoiceField(queryset=Moneda.objects.all(), empty_label="--", to_field_name="nombreMoneda",
+                                    widget=forms.Select(attrs={'class': 'form-control'}))
+    cantidad = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
 
 class LoginForm(forms.Form):
     nombreUsuario = forms.CharField(max_length=100, widget=forms.TextInput)
     contrasena = forms.CharField(max_length=32, widget=forms.PasswordInput)
 
 class EnviarMonedasForm(forms.Form):
-    moneda = forms.ModelChoiceField(queryset=Moneda.objects.all(), empty_label="--", to_field_name="nombreMoneda")
-    usuario = forms.ModelChoiceField(queryset=Usuario.objects.all(), empty_label="--", to_field_name="nombreUsuario")
-    cantidad = forms.IntegerField(widget=forms.NumberInput)
+    moneda = forms.ModelChoiceField(queryset=Moneda.objects.all(), empty_label="--", to_field_name="nombreMoneda",
+                                    widget=forms.Select(attrs={'class': 'form-control'}))
+    usuario = forms.ModelChoiceField(queryset=Usuario.objects.all(), empty_label="--", to_field_name="nombreUsuario",
+                                     widget=forms.Select(attrs={'class': 'form-control'}))
+    cantidad = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
