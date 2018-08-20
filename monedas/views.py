@@ -1,7 +1,7 @@
 from django.contrib import messages
 
 from .models import Moneda, Usuario, MonedasUsuario, Historial
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import  ValidationError
 from django.shortcuts import render, redirect
 from .forms import UsuarioForm, LoginForm, MonedaForm, EnviarMonedasForm, ComprarMonedasForm
 from django.http import HttpResponse
@@ -112,48 +112,46 @@ def comprarMonedas(request, user):
         context = {'form': form, 'user': user, 'titulo': 'Comprar Monedas', 'urlParam': 'comprarMonedas'}
         return render(request, 'monedas/monedas_template.html', context)
 
+def commitCambios(userEnvia,userRecibe,moneda,cantidad):
+    userRecibe.save()
+    userEnvia.save()
+    Historial.objects.create(accion="Enviar Monedas",
+                             usuarioCreador="",
+                             usuarioEnvia=userEnvia.usuario,
+                             usuarioRecibe=userRecibe.usuario,
+                             moneda=moneda,
+                             cantMonedas=cantidad)
+
 
 def enviarMonedas(request, user):
     if request.method == 'POST':
         form = EnviarMonedasForm(request.POST)
         if form.is_valid():
-            moneda = form.cleaned_data['moneda']
-            usuarioRecibe = form.cleaned_data['usuario']
-            cantidad = form.cleaned_data['cantidad']
+            moneda, usuarioRecibe, cantidad = form.cleaned_data['moneda'], form.cleaned_data['usuario'], form.cleaned_data['cantidad']
             userEnvia = MonedasUsuario.objects.get(usuario=user, moneda=moneda)
-            userRecibe = None
-            try:
-                userRecibe = MonedasUsuario.objects.get(moneda=moneda, usuario=usuarioRecibe)
-                userEnvia.enviarMonedasExistente(cantidad, userRecibe)
-            except MonedasUsuario.DoesNotExist:
-                userRecibe = userEnvia.enviarMonedasANuevo(cantidad, usuarioRecibe, moneda)
-            except ValidationError:
-                messages.error(request, "No posee suficientes monedas")
-            finally:
-                if userRecibe is None:
-                    Historial.objects.create(accion="Enviado Fallido de Monedas",
-                                             usuarioCreador="",
-                                             usuarioEnvia=user,
-                                             usuarioRecibe=usuarioRecibe,
-                                             moneda=moneda,
-                                             cantMonedas=cantidad)
-                else:
-                    userRecibe.save()
-                    userEnvia.save()
-                    messages.success(request, "Transaccion realizada correctamente")
-                    Historial.objects.create(accion="Enviar Monedas",
-                                             usuarioCreador="",
-                                             usuarioEnvia=user,
-                                             usuarioRecibe=usuarioRecibe,
-                                             moneda=moneda,
-                                             cantMonedas=cantidad)
-                return HttpResponseRedirect("")
+
+            userRecibe = MonedasUsuario.objects.filter(moneda=moneda, usuario=usuarioRecibe)
+            if userRecibe.count() > 0:
+                try:
+                    userRecibe = userRecibe.get()
+                    userEnvia.enviarMonedasExistente(cantidad, userRecibe)
+                    commitCambios(userEnvia, userRecibe, moneda, cantidad)
+                except ValidationError:
+                    messages.error(request, "No posee suficientes monedas")
+            else:
+                try:
+                    userRecibe = userEnvia.enviarMonedasANuevo(cantidad, usuarioRecibe, moneda)
+                    commitCambios(userEnvia, userRecibe, moneda, cantidad)
+                except ValidationError:
+                    messages.error(request, "No posee suficientes monedas")
+            return HttpResponseRedirect("")
         else:
             return HttpResponse("Error en la creacion de moneda")
     else:
         form = EnviarMonedasForm()
         context = {'form': form, 'user': user, 'titulo': 'Enviar Monedas', 'urlParam': 'enviarMonedas'}
         return render(request, 'monedas/monedas_template.html', context)
+
 
 def balance(request, user):
     monedasDeUsuario = MonedasUsuario.objects.filter(usuario=user)

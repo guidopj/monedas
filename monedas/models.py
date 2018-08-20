@@ -37,7 +37,7 @@ class MonedasUsuario(models.Model):
     def poseeSufMonedas(self, cantPedidas):
         return self.cantMonedas >= cantPedidas
 
-    def enviarMonedas(self, cantPedidas, userRecibe):
+    def enviarMonedasExistente(self, cantPedidas, userRecibe):
         if self.poseeSufMonedas(cantPedidas):
             userRecibe.cantMonedas = userRecibe.cantMonedas + cantPedidas
             self.cantMonedas = self.cantMonedas - cantPedidas
@@ -50,8 +50,7 @@ class MonedasUsuario(models.Model):
             self.cantMonedas = self.cantMonedas - cantidad
             return userRecibe
         else:
-            messages.error("No posees dicha cantidad de monedas")
-            raise ValidationError()
+            raise ValidationError("No tenes suficientes monedas")
 
 
 class Historial(models.Model):
